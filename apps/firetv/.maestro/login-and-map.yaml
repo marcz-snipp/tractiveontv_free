@@ -1,0 +1,34 @@
+appId: com.tot.firetv
+name: Login then map
+tags:
+  - smoke
+---
+- launchApp:
+    clearState: true
+
+- assertVisible: "Connexion"
+
+- tapOn:
+    id: "email-input"
+- inputText: ${MAESTRO_TRACTIVE_EMAIL}
+
+- tapOn:
+    id: "password-input"
+- inputText: ${MAESTRO_TRACTIVE_PASSWORD}
+
+- tapOn:
+    text: "Se connecter"
+
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "Map"
+    timeout: 15000
+
+- tapOn:
+    text: "Menu"
+
+- assertVisible: "Settings"
+
+- tapOn:
+    text: "Retour"

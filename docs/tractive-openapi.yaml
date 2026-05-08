@@ -1,0 +1,682 @@
+openapi: 3.0.3
+
+info:
+  title: Tractive (non officiel)
+  version: "2026-05-08"
+  description: |
+    Spécification OpenAPI **non officielle** de l'API Tractive, restreinte aux
+    endpoints réellement consommés par l'application Fire TV `TOT — Tractive On TV`
+    (cf. CLAUDE.md). Reconstruite par capture réseau de `my.tractive.com` (web)
+    et de l'app iOS officielle (via mitmproxy), croisée avec les implémentations
+    communautaires.
+
+    Tous les endpoints sous `/4/` exigent les headers `Authorization`,
+    `X-Tractive-User`, `X-Tractive-Client` (sauf `/4/auth/token`). Les valeurs
+    des exemples sont neutralisées (`<bearer-token>`, `<user-id>`).
+
+    **Endpoints Wellness (`aps-api.tractive.com`)** — observés en mai 2026 :
+    réservés aux comptes Premium, données disponibles après ~7 j d'activité
+    (statut `CALCULATING_BASELINE` en attendant). Confirmés joignables avec
+    le client web standard, pas besoin du client iOS dédié.
+
+servers:
+  - url: https://graph.tractive.com
+    description: API principale
+  - url: https://aps-api.tractive.com
+    description: Wellness / santé
+
+security:
+  - bearerAuth: []
+    tractiveUser: []
+    tractiveClient: []
+
+tags:
+  - name: Auth
+    description: Authentification
+  - name: Tracker
+    description: Trackers GPS, positions, commandes, geofences
+  - name: Pet
+    description: Animaux suivis
+  - name: Bulk
+    description: Lecture multi-objets (orchestrateur de polling)
+  - name: Wellness
+    description: Activité / sommeil / biométrie (V2)
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+      description: Token opaque obtenu via `POST /4/auth/token`.
+    tractiveUser:
+      type: apiKey
+      in: header
+      name: X-Tractive-User
+      description: ID utilisateur Tractive (24 hex). Doit correspondre au token.
+    tractiveClient:
+      type: apiKey
+      in: header
+      name: X-Tractive-Client
+      description: ID client app. Valeur web officielle = `5728aa1fc9077f7c32000186`.
+
+  parameters:
+    XTractiveUser:
+      name: X-Tractive-User
+      in: header
+      required: true
+      schema: { type: string, example: "<user-id>" }
+    XTractiveClient:
+      name: X-Tractive-Client
+      in: header
+      required: true
+      schema: { type: string, example: "5728aa1fc9077f7c32000186" }
+
+  schemas:
+
+    AuthTokenRequest:
+      type: object
+      required: [grant_type, platform_email, platform_token]
+      properties:
+        grant_type:
+          type: string
+          enum: [tractive]
+        platform_email: { type: string, format: email }
+        platform_token: { type: string, description: "Mot de passe utilisateur" }
+
+    AuthToken:
+      type: object
+      required: [user_id, client_id, expires_at, access_token]
+      properties:
+        user_id:      { type: string, example: "<user-id>" }
+        client_id:    { type: string, example: "5728aa1fc9077f7c32000186" }
+        expires_at:   { type: integer, format: int64, description: "Epoch seconds" }
+        access_token: { type: string, example: "<bearer-token>" }
+
+    TrackerRef:
+      type: object
+      required: [_type, _id]
+      properties:
+        _type: { type: string, enum: [tracker] }
+        _id:   { type: string, example: "TRACKER01" }
+
+    TrackerCommandStateRef:
+      type: object
+      required: [_type, _id]
+      properties:
+        _type: { type: string, enum: [tracker_command_state] }
+        _id:
+          type: string
+          description: "Format `{trackerIdLower}_{led_control|buzzer_control|live_tracking}`"
+          example: "tracker01_live_tracking"
+
+    TrackerCommandState:
+      type: object
+      properties:
+        _id:          { type: string, example: "tracker01_live_tracking" }
+        _version:     { type: string }
+        _type:        { type: string, enum: [tracker_command_state] }
+        active:       { type: boolean }
+        started_at:   { type: integer, format: int64, nullable: true }
+        timeout:      { type: integer, description: "Durée max en secondes" }
+        remaining:    { type: integer, description: "Secondes restantes" }
+        pending:      { type: boolean }
+        reconnecting: { type: boolean, description: "Présent uniquement pour live_tracking" }
+
+    DevicePosReport:
+      type: object
+      properties:
+        _id:         { type: string }
+        _type:       { type: string, enum: [device_pos_report] }
+        time:        { type: integer, format: int64 }
+        latlong:
+          type: array
+          minItems: 2
+          maxItems: 2
+          items: { type: number }
+        pos_uncertainty: { type: number }
+        sensor_used:     { type: string, enum: [GPS, WIFI, CELLULAR, KNOWN_WIFI, BLUETOOTH] }
+
+    DeviceHwReport:
+      type: object
+      properties:
+        _id:                  { type: string }
+        _type:                { type: string, enum: [device_hw_report] }
+        battery_level:        { type: integer }
+        tracker_state:        { type: string }
+        power_saving_zone_id: { type: string, nullable: true }
+        charging_state:       { type: string }
+
+    BulkRequest:
+      type: array
+      items:
+        oneOf:
+          - $ref: "#/components/schemas/TrackerRef"
+          - $ref: "#/components/schemas/TrackerCommandStateRef"
+      example:
+        - { _type: tracker_command_state, _id: "tracker01_live_tracking" }
+        - { _type: tracker, _id: "TRACKER01" }
+
+    BulkResponse:
+      type: array
+      description: |
+        Tableau hétérogène d'objets résolus. Types observés : `tracker`,
+        `tracker_command_state`, `device_pos_report`, `device_hw_report`, `pet`.
+      items:
+        oneOf:
+          - $ref: "#/components/schemas/TrackerCommandState"
+          - $ref: "#/components/schemas/DevicePosReport"
+          - $ref: "#/components/schemas/DeviceHwReport"
+          - $ref: "#/components/schemas/Pet"
+
+    PositionPoint:
+      type: object
+      description: |
+        Point de position observé. **Note** : malgré le paramètre
+        `format=json_segments`, l'API renvoie en réalité des **objets**
+        (pas des tuples plats).
+      required: [time, latlong, sensor_used]
+      properties:
+        time:            { type: integer, format: int64, description: "Epoch seconds" }
+        latlong:
+          type: array
+          minItems: 2
+          maxItems: 2
+          items: { type: number }
+          example: [43.121857, 6.065915]
+        alt:             { type: number, nullable: true }
+        speed:           { type: number, nullable: true }
+        course:          { type: number, nullable: true }
+        pos_uncertainty: { type: number }
+        sensor_used:     { type: string, enum: [GPS, WIFI, CELLULAR, KNOWN_WIFI, BLUETOOTH] }
+
+    PositionSegment:
+      type: array
+      description: Segment temporel — array de points triés chronologiquement.
+      items: { $ref: "#/components/schemas/PositionPoint" }
+
+    Geofence:
+      type: object
+      properties:
+        _id:      { type: string }
+        _type:    { type: string, enum: [geofence] }
+        _version: { type: string }
+        name:     { type: string }
+        active:   { type: boolean }
+        shape:
+          type: object
+          properties:
+            type:        { type: string, enum: [polygon, circle] }
+            coordinates:
+              type: array
+              description: Polygone fermé [[lng, lat], …] ou centre+rayon selon `type`.
+              items:
+                type: array
+                items: { type: number }
+
+    Pet:
+      type: object
+      description: |
+        Animal suivi. Le `_type` réel observé est **`pet`** (pas
+        `trackable_object` comme suggéré par le nom de la route).
+      required: [_id, _type]
+      properties:
+        _id:        { type: string, example: "000000000000000000000000" }
+        _type:      { type: string, enum: [pet] }
+        _version:   { type: string }
+        device_id:  { type: string, description: "ID du tracker associé", example: "TRACKER01" }
+        details:
+          type: object
+          properties:
+            name:     { type: string, example: "Felix" }
+            pet_type: { type: string, enum: [CAT, DOG] }
+            gender:   { type: string, enum: [F, M, U] }
+            birthday: { type: integer, format: int64 }
+            weight:   { type: integer, nullable: true, description: "Poids en grammes" }
+            profile_picture_id: { type: string, nullable: true }
+
+    BiometricStatus:
+      type: string
+      description: |
+        Statut biométrique côté Tractive. `NORMAL` quand la valeur du jour est
+        dans la fourchette habituelle de l'animal ; `LOW`/`HIGH` quand elle
+        sort des bornes ; `CALCULATING_BASELINE` tant que Tractive n'a pas
+        accumulé assez d'historique (~7 j).
+      enum: [NORMAL, LOW, HIGH, CALCULATING_BASELINE]
+
+    HealthBiometricOverview:
+      type: object
+      description: |
+        Résumé biométrique tel qu'il apparaît dans `/health/overview`. **Ne
+        contient pas la valeur numérique** (BPM/RPM) — uniquement le statut.
+        La valeur du jour s'obtient via `/resting-heart-rate/day-overview`
+        et `/resting-respiratory-rate/day-overview`.
+      properties:
+        status:    { $ref: "#/components/schemas/BiometricStatus" }
+        dayOffset: { type: integer, description: "Offset par rapport au jour courant (0 = aujourd'hui)" }
+
+    HealthOverview:
+      type: object
+      required: [petId]
+      properties:
+        petId: { type: string }
+        activityDataSyncedAt:
+          type: string
+          format: date-time
+        activity:
+          type: object
+          properties:
+            minutesGoal:   { type: integer }
+            minutesActive: { type: integer }
+        sleep:
+          type: object
+          description: "Total `minutesNightSleep + minutesDaySleep + minutesCalm` = sommeil affiché par l'app mobile."
+          properties:
+            minutesDaySleep:   { type: integer }
+            minutesNightSleep: { type: integer }
+            minutesCalm:       { type: integer }
+        rest:    { type: object, nullable: true, description: "Non documenté ; `null` pour les chats." }
+        bark:    { type: object, nullable: true, description: "Non documenté ; `null` pour les chats." }
+        scratch: { type: object, nullable: true, description: "Non documenté ; `null` pour les chats." }
+        restingHeartRate:       { $ref: "#/components/schemas/HealthBiometricOverview" }
+        restingRespiratoryRate: { $ref: "#/components/schemas/HealthBiometricOverview" }
+        healthAlerts:
+          type: object
+          properties:
+            unseenCount: { type: integer }
+        associatedData:
+          type: array
+          description: "Pointeurs vers d'autres ressources santé (ex. `HEALTH_WEEKLY_REPORT`)."
+          items:
+            type: object
+            properties:
+              type: { type: string, example: "HEALTH_WEEKLY_REPORT" }
+
+    BiometricBounds:
+      type: object
+      description: |
+        Fourchettes de référence pour la biométrie au repos. `lower`/`upper`
+        délimitent la zone "Normale", `min`/`max` les extrêmes physiologiques
+        utilisés pour l'échelle complète.
+      required: [min, lower, upper, max]
+      properties:
+        min:   { type: number, description: "Borne inférieure absolue (ex. 56 BPM, 8 RPM)" }
+        lower: { type: number, description: "Seuil bas de la zone Normale (en deçà = LOW)" }
+        upper: { type: number, description: "Seuil haut de la zone Normale (au delà = HIGH)" }
+        max:   { type: number, description: "Borne supérieure absolue" }
+
+    BiometricLookbackDay:
+      type: object
+      description: |
+        Valeur biométrique pour un jour donné dans le lookback. `average`,
+        `status` et `bounds` sont `null` quand il n'y a pas de données pour
+        ce jour (ex. avant `dayOffset = -2` pour un nouveau tracker).
+      required: [dayOffset]
+      properties:
+        dayOffset: { type: integer, description: "0 = aujourd'hui, -1 = hier, etc." }
+        average:   { type: number, nullable: true }
+        status:    { type: string, nullable: true }
+        bounds:
+          type: object
+          nullable: true
+          properties:
+            lower: { type: number }
+            upper: { type: number }
+
+    BiometricLookback:
+      type: object
+      required: [average, days]
+      properties:
+        average: { type: number, description: "Moyenne 7 derniers jours (jours sans donnée exclus)" }
+        days:
+          type: array
+          description: "Tableau des 7 derniers jours (dayOffset 0 à -6)."
+          items: { $ref: "#/components/schemas/BiometricLookbackDay" }
+
+    BiometricDayOverview:
+      type: object
+      description: |
+        Réponse de `/api/1/pet/{petId}/resting-{heart|respiratory}-rate/day-overview`.
+        Contient la valeur moyenne du jour, les bornes de référence, et le
+        lookback 7 jours utilisé par l'app mobile pour le graphique.
+      required: [status, average, bounds, lookback]
+      properties:
+        status:   { $ref: "#/components/schemas/BiometricStatus" }
+        average:  { type: number, description: "Valeur moyenne du jour (BPM ou RPM)" }
+        bounds:   { $ref: "#/components/schemas/BiometricBounds" }
+        ageGroup:
+          type: string
+          description: "Tranche d'âge utilisée pour calibrer les bornes (ex. `YOUNG`, `ADULT`, `SENIOR`)."
+        lookback: { $ref: "#/components/schemas/BiometricLookback" }
+
+  responses:
+    Unauthorized:
+      description: Token absent ou invalide
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:   { type: string }
+              message: { type: string }
+
+paths:
+
+  # --- Authentification ----------------------------------------------------
+  /4/auth/token:
+    post:
+      tags: [Auth]
+      summary: Connexion (obtenir un access_token)
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/XTractiveClient"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AuthTokenRequest" }
+      responses:
+        "200":
+          description: Token émis
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthToken" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # --- Trackers ------------------------------------------------------------
+  /4/user/{userId}/trackers:
+    get:
+      tags: [Tracker]
+      summary: Liste des trackers de l'utilisateur
+      description: |
+        L'alias `me` est accepté à la place de l'ID :
+        `GET /4/user/me/trackers` → mêmes données.
+      parameters:
+        - { name: userId, in: path, required: true, schema: { type: string }, description: "ID utilisateur ou littéral `me`" }
+        - $ref: "#/components/parameters/XTractiveUser"
+        - $ref: "#/components/parameters/XTractiveClient"
+      responses:
+        "200":
+          description: Liste de références tracker
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/TrackerRef" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /4/tracker/{trackerId}:
+    get:
+      tags: [Tracker]
+      summary: Détails d'un tracker
+      parameters:
+        - { name: trackerId, in: path, required: true, schema: { type: string }, example: "TRACKER01" }
+        - $ref: "#/components/parameters/XTractiveUser"
+        - $ref: "#/components/parameters/XTractiveClient"
+      responses:
+        "200": { description: OK }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /4/tracker/{trackerId}/geofences:
+    get:
+      tags: [Tracker]
+      summary: Liste des zones de sécurité
+      parameters:
+        - { name: trackerId, in: path, required: true, schema: { type: string } }
+        - $ref: "#/components/parameters/XTractiveUser"
+        - $ref: "#/components/parameters/XTractiveClient"
+      responses:
+        "200":
+          description: Liste de geofences
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Geofence" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /4/tracker/{trackerId}/positions:
+    get:
+      tags: [Tracker]
+      summary: Historique de positions
+      description: |
+        ⚠️ **Format réel** : malgré le paramètre `format=json_segments`,
+        l'API renvoie un **array de segments**, chaque segment étant un
+        **array d'objets** `PositionPoint` (pas des tuples plats).
+      parameters:
+        - { name: trackerId, in: path, required: true, schema: { type: string } }
+        - { name: time_from, in: query, required: true, schema: { type: integer, format: int64 }, description: "Epoch seconds (début)" }
+        - { name: time_to,   in: query, required: true, schema: { type: integer, format: int64 }, description: "Epoch seconds (fin)" }
+        - { name: format,    in: query, required: false, schema: { type: string, enum: [json_segments], default: json_segments } }
+        - $ref: "#/components/parameters/XTractiveUser"
+        - $ref: "#/components/parameters/XTractiveClient"
+      responses:
+        "200":
+          description: Tableau de segments
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PositionSegment" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /4/tracker/{trackerId}/command/led_control/{action}:
+    get:
+      tags: [Tracker]
+      summary: Allumer/éteindre la LED du tracker
+      description: |
+        **Important** : la méthode est `GET` (et non `POST` comme suggéré
+        par certaines bibliothèques tierces).
+
+        Silencieusement refusée si le tracker est en zone d'économie
+        d'énergie (Wi-Fi connue) — le serveur peut répondre OK alors
+        que rien ne se passe. Vérifier l'état réel via `/4/bulk`
+        (`tracker_command_state.active` avec `_id: "{trackerIdLower}_led_control"`).
+      parameters:
+        - { name: trackerId, in: path, required: true, schema: { type: string } }
+        - { name: action,    in: path, required: true, schema: { type: string, enum: [on, off] } }
+        - $ref: "#/components/parameters/XTractiveUser"
+        - $ref: "#/components/parameters/XTractiveClient"
+      responses:
+        "200": { description: Commande acceptée }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /4/tracker/{trackerId}/command/buzzer_control/{action}:
+    get:
+      tags: [Tracker]
+      summary: Activer/désactiver le buzzer du tracker
+      description: |
+        **Important** : la méthode est `GET` (et non `POST` comme suggéré
+        par certaines bibliothèques tierces).
+
+        Silencieusement refusée si le tracker est en zone d'économie
+        d'énergie (Wi-Fi connue). Vérifier l'état réel via `/4/bulk`
+        (`tracker_command_state.active` avec `_id: "{trackerIdLower}_buzzer_control"`).
+      parameters:
+        - { name: trackerId, in: path, required: true, schema: { type: string } }
+        - { name: action,    in: path, required: true, schema: { type: string, enum: [on, off] } }
+        - $ref: "#/components/parameters/XTractiveUser"
+        - $ref: "#/components/parameters/XTractiveClient"
+      responses:
+        "200": { description: Commande acceptée }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /4/tracker/{trackerId}/command/live_tracking/{action}:
+    get:
+      tags: [Tracker]
+      summary: Activer/désactiver le suivi temps réel
+      description: |
+        **Important** : la méthode est `GET` (et non `POST` comme suggéré
+        par certaines bibliothèques tierces).
+
+        Bloqué côté serveur si le tracker est dans une zone d'économie
+        d'énergie (Wi-Fi connue) — le serveur peut répondre OK alors que
+        la commande est silencieusement refusée. Vérifier l'état réel
+        via `/4/bulk` (`tracker_command_state.active`).
+      parameters:
+        - { name: trackerId, in: path, required: true, schema: { type: string } }
+        - { name: action,    in: path, required: true, schema: { type: string, enum: [on, off] } }
+        - $ref: "#/components/parameters/XTractiveUser"
+        - $ref: "#/components/parameters/XTractiveClient"
+      responses:
+        "200": { description: Commande acceptée }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # --- Pet -----------------------------------------------------------------
+  # NOTE : la route s'appelle `trackable_object` mais l'objet retourné
+  # a `_type: pet`. Confirmé par capture réseau.
+  /4/trackable_object/{trackableObjectId}:
+    get:
+      tags: [Pet]
+      summary: Détails d'un animal
+      parameters:
+        - { name: trackableObjectId, in: path, required: true, schema: { type: string } }
+        - $ref: "#/components/parameters/XTractiveUser"
+        - $ref: "#/components/parameters/XTractiveClient"
+      responses:
+        "200":
+          description: Objet pet
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Pet" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # --- Bulk (orchestrateur de polling) -------------------------------------
+  /4/bulk:
+    post:
+      tags: [Bulk]
+      summary: Lecture en lot d'objets graph
+      description: |
+        Endpoint principal du polling 60 s (mode standard) et 20 s (mode live).
+        Permet de récupérer en un seul appel batterie + position + statut
+        commande live. Types attendus en requête : `tracker`,
+        `tracker_command_state`. Types retournés : `tracker`,
+        `tracker_command_state`, `device_pos_report`, `device_hw_report`, `pet`.
+      parameters:
+        - { name: partial, in: query, required: false, schema: { type: integer, enum: [0, 1] }, description: "1 = autorise les réponses partielles" }
+        - $ref: "#/components/parameters/XTractiveUser"
+        - $ref: "#/components/parameters/XTractiveClient"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BulkRequest" }
+      responses:
+        "200":
+          description: Tableau d'objets résolus
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BulkResponse" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # --- Wellness ------------------------------------------------------------
+  /api/1/pet/{petId}/health/overview:
+    servers:
+      - url: https://aps-api.tractive.com
+    get:
+      tags: [Wellness]
+      summary: Vue d'ensemble santé d'un animal
+      description: |
+        Endpoint Wellness sur `aps-api.tractive.com`. Renvoie l'activité
+        du jour, le sommeil, le statut biométrique au repos et un compteur
+        d'alertes santé. **Ne renvoie pas la valeur numérique** BPM/RPM —
+        utiliser `/resting-heart-rate/day-overview` et
+        `/resting-respiratory-rate/day-overview` pour ça.
+
+        Réservé aux comptes Premium (403 sinon). Champs `rest`/`bark`/`scratch`
+        non applicables au chat (`null`). Statut biométrique
+        `CALCULATING_BASELINE` tant que Tractive n'a pas accumulé ~7 j d'historique.
+      parameters:
+        - { name: petId, in: path, required: true, schema: { type: string } }
+        - $ref: "#/components/parameters/XTractiveUser"
+        - $ref: "#/components/parameters/XTractiveClient"
+      responses:
+        "200":
+          description: Données de santé
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HealthOverview" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Compte non-Premium
+
+  /api/1/pet/{petId}/resting-heart-rate/day-overview:
+    servers:
+      - url: https://aps-api.tractive.com
+    get:
+      tags: [Wellness]
+      summary: Détail fréquence cardiaque au repos pour un jour donné
+      description: |
+        Endpoint Wellness Premium. Renvoie la moyenne BPM du jour demandé,
+        les bornes Faible/Normale/Élevée calibrées sur la tranche d'âge de
+        l'animal, et le lookback 7 jours utilisé par l'app mobile pour
+        afficher le graphique de tendance.
+
+        Réservé aux comptes Premium. Joignable avec le client web standard
+        (`X-Tractive-Client: 5728aa1fc9077f7c32000186`) — pas besoin du
+        client iOS dédié observé dans l'app mobile.
+      parameters:
+        - { name: petId, in: path, required: true, schema: { type: string } }
+        - name: date
+          in: query
+          required: true
+          schema: { type: string, format: date, example: "2026-05-08" }
+          description: "Jour cible au format `YYYY-MM-DD`."
+        - $ref: "#/components/parameters/XTractiveUser"
+        - $ref: "#/components/parameters/XTractiveClient"
+      responses:
+        "200":
+          description: Détail BPM du jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BiometricDayOverview" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Compte non-Premium
+        "404":
+          description: Pas de données pour ce jour
+
+  /api/1/pet/{petId}/resting-respiratory-rate/day-overview:
+    servers:
+      - url: https://aps-api.tractive.com
+    get:
+      tags: [Wellness]
+      summary: Détail fréquence respiratoire au repos pour un jour donné
+      description: |
+        Pendant respiratoire de `/resting-heart-rate/day-overview`. Mêmes
+        contraintes (Premium, client web OK), même schéma de réponse — la
+        valeur `average` est en RPM (respirations par minute).
+      parameters:
+        - { name: petId, in: path, required: true, schema: { type: string } }
+        - name: date
+          in: query
+          required: true
+          schema: { type: string, format: date, example: "2026-05-08" }
+          description: "Jour cible au format `YYYY-MM-DD`."
+        - $ref: "#/components/parameters/XTractiveUser"
+        - $ref: "#/components/parameters/XTractiveClient"
+      responses:
+        "200":
+          description: Détail RPM du jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BiometricDayOverview" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Compte non-Premium
+        "404":
+          description: Pas de données pour ce jour

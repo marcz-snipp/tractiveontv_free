@@ -1,0 +1,120 @@
+export const tokens = {
+  colors: {
+    bg: {
+      DEFAULT: '#0b0f14',
+      raised: '#11181f',
+      sunken: '#070a0e',
+    },
+    surface: {
+      DEFAULT: 'rgba(15,23,32,0.72)',
+      strong: 'rgba(15,23,32,0.92)',
+      muted: 'rgba(15,23,32,0.4)',
+    },
+    border: {
+      DEFAULT: 'rgba(255,255,255,0.08)',
+      strong: 'rgba(255,255,255,0.16)',
+    },
+    text: {
+      DEFAULT: '#f0f6fc',
+      muted: '#94a3b8',
+      subtle: '#64748b',
+      inverse: '#0b0f14',
+    },
+    accent: {
+      DEFAULT: '#f59e0b',
+      strong: '#fbbf24',
+      soft: 'rgba(245,158,11,0.18)',
+    },
+    focus: {
+      DEFAULT: '#fbbf24',
+      glow: 'rgba(251,191,36,0.55)',
+    },
+    success: {
+      DEFAULT: '#22c55e',
+      soft: 'rgba(34,197,94,0.18)',
+    },
+    warning: {
+      DEFAULT: '#f97316',
+      soft: 'rgba(249,115,22,0.18)',
+    },
+    danger: {
+      DEFAULT: '#ef4444',
+      soft: 'rgba(239,68,68,0.18)',
+    },
+    info: {
+      DEFAULT: '#38bdf8',
+      soft: 'rgba(56,189,248,0.18)',
+    },
+    live: {
+      DEFAULT: '#ec4899',
+      soft: 'rgba(236,72,153,0.22)',
+    },
+  },
+  fontSize: {
+    micro: ['14px', { lineHeight: '20px', letterSpacing: '0.02em' }],
+    caption: ['16px', { lineHeight: '22px' }],
+    body: ['20px', { lineHeight: '28px' }],
+    'body-lg': ['24px', { lineHeight: '32px' }],
+    h3: ['28px', { lineHeight: '36px', letterSpacing: '-0.01em' }],
+    h2: ['32px', { lineHeight: '40px', letterSpacing: '-0.015em' }],
+    h1: ['40px', { lineHeight: '48px', letterSpacing: '-0.02em' }],
+    display: ['56px', { lineHeight: '64px', letterSpacing: '-0.025em' }],
+    hero: ['72px', { lineHeight: '80px', letterSpacing: '-0.03em' }],
+  },
+  spacing: {
+    px: '1px',
+    0: '0',
+    1: '4px',
+    2: '8px',
+    3: '12px',
+    4: '16px',
+    5: '20px',
+    6: '24px',
+    8: '32px',
+    10: '40px',
+    12: '48px',
+    14: '56px',
+    16: '64px',
+    20: '80px',
+    24: '96px',
+    28: '112px',
+    32: '128px',
+    'safe-x': '96px',
+    'safe-y': '108px',
+  },
+  borderRadius: {
+    none: '0',
+    sm: '6px',
+    md: '10px',
+    lg: '14px',
+    xl: '20px',
+    '2xl': '28px',
+    '3xl': '40px',
+    full: '9999px',
+  },
+  boxShadow: {
+    focus: '0 0 0 3px rgba(251,191,36,0.55), 0 16px 40px rgba(0,0,0,0.55)',
+    card: '0 12px 36px rgba(0,0,0,0.55)',
+    glow: '0 0 24px rgba(251,191,36,0.35)',
+  },
+  durations: {
+    fast: 120,
+    base: 220,
+    slow: 360,
+  },
+  focus: {
+    scale: 1.06,
+    scalePress: 0.97,
+    pulseLow: 1.03,
+    pulseHigh: 1.08,
+    pulseDuration: 1100,
+  },
+  layout: {
+    safeX: 96,
+    safeY: 108,
+    minTapHeight: 56,
+    minTapWidth: 56,
+  },
+} as const;
+
+export type Tokens = typeof tokens;

@@ -1,0 +1,155 @@
+{
+  "app": {
+    "name": "TOT",
+    "tagline": "Suivi GPS de votre chat sur la TV"
+  },
+  "common": {
+    "back": "Retour",
+    "cancel": "Annuler",
+    "ok": "OK",
+    "save": "Enregistrer",
+    "loading": "Chargement…",
+    "retry": "Réessayer",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "auth": {
+    "login": {
+      "title": "Connexion",
+      "subtitle": "Identifiants Tractive",
+      "email": "Adresse email",
+      "emailPlaceholder": "vous@exemple.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "•••••••••",
+      "rememberMe": "Se souvenir de moi",
+      "rememberMeHint": "Vos identifiants seront chiffrés sur l'appareil.",
+      "submit": "Se connecter",
+      "submitting": "Connexion…",
+      "forgotPassword": "Identifiants oubliés ? Réinitialisez sur tractive.com",
+      "errors": {
+        "invalidCredentials": "Email ou mot de passe incorrect.",
+        "network": "Impossible de joindre le serveur. Vérifiez votre connexion.",
+        "rateLimited": "Trop de tentatives. Réessayez dans quelques minutes.",
+        "generic": "Une erreur est survenue lors de la connexion."
+      }
+    },
+    "logout": {
+      "confirm": "Se déconnecter ?",
+      "confirmHint": "Vos identifiants locaux seront effacés.",
+      "submit": "Se déconnecter",
+      "exit": {
+        "confirm": "Quitter l'application ?",
+        "confirmHint": "L'application se fermera et vos identifiants locaux seront effacés.",
+        "submit": "Quitter"
+      }
+    }
+  },
+  "map": {
+    "recenter": "Recentrer",
+    "home": "Maison",
+    "refresh": "Rafraîchir",
+    "live": "Mode live",
+    "liveStop": "Arrêter le live",
+    "liveActive": "Live actif — {{remaining}}s",
+    "liveBlockedPSZ": "{{name}} est dans une zone d'économie d'énergie. Le mode live n'est pas disponible.",
+    "history": "Historique",
+    "menu": "Menu",
+    "lastSeen": "Vu {{time}}",
+    "battery": "Batterie {{level}}%",
+    "sensor": {
+      "GPS": "GPS",
+      "WIFI": "Wi-Fi",
+      "CELLULAR": "Cellulaire",
+      "KNOWN_WIFI": "Wi-Fi connu",
+      "BLUETOOTH": "Bluetooth"
+    }
+  },
+  "status": {
+    "online": "En ligne",
+    "offline": "Hors ligne",
+    "gps_fix": "Position GPS",
+    "last_known_wifi_cell": "Dernière position connue",
+    "power_saving_zone": "Zone d'économie d'énergie",
+    "charging": "En charge",
+    "live_active": "Live actif",
+    "live_reconnecting": "Reconnexion…",
+    "low_battery": "Batterie faible"
+  },
+  "geofence": {
+    "outOfZone": "{{name}} est sortie de la zone {{zone}} !",
+    "inZone": "{{name}} est dans la zone {{zone}}"
+  },
+  "pets": {
+    "title": "Mes animaux",
+    "menu": "Animaux",
+    "available_one": "{{count}} trackeur disponible",
+    "available_other": "{{count}} trackeurs disponibles"
+  },
+  "nav": {
+    "map": "Carte",
+    "settings": "Réglages",
+    "health": "Santé"
+  },
+  "health": {
+    "title": "Santé",
+    "syncedAgo": "Synchro {{time}}",
+    "activity": {
+      "title": "Activité",
+      "ratio": "{{active}} / {{goal}} min",
+      "goalLabel": "Objectif du jour"
+    },
+    "sleep": {
+      "title": "Sommeil",
+      "night": "Nuit",
+      "day": "Jour",
+      "calm": "Calme"
+    },
+    "heartRate": { "title": "Fréquence cardiaque", "unit": "bpm" },
+    "respiratoryRate": { "title": "Fréquence respiratoire", "unit": "rpm" },
+    "status": {
+      "NORMAL": "Normale",
+      "LOW": "Faible",
+      "HIGH": "Élevée",
+      "UNKNOWN": "—"
+    },
+    "weekAverage": "Moy. 7j : {{value}} {{unit}}",
+    "calculating": "En apprentissage · j {{day}}/7",
+    "premiumRequired": {
+      "title": "Tractive Premium requis",
+      "body": "Les données de santé sont réservées aux comptes Premium.",
+      "cta": "En savoir plus sur tractive.com"
+    },
+    "loadError": "Impossible de charger les données santé."
+  },
+  "settings": {
+    "title": "Réglages",
+    "language": "Langue",
+    "zoneSound": {
+      "title": "Son alerte zone",
+      "description": "Joue un son lorsque le chat sort d'une zone de sécurité."
+    },
+    "logout": {
+      "title": "Déconnexion",
+      "session": "Session : {{userId}} · expire le {{date}}"
+    },
+    "errors": {
+      "loadTrackers": "Impossible de charger les trackers.",
+      "loadTrackersTitle": "Erreur",
+      "noPetsTitle": "Aucun chat trouvé",
+      "noPetsHint": "Ajoutez un tracker dans l'app Tractive officielle puis revenez ici.",
+      "trackerNotFound": "Tracker introuvable",
+      "missingMaptilerKey": "EXPO_PUBLIC_MAPTILER_KEY manquante",
+      "waitingPosition": "En attente de la position…"
+    }
+  },
+  "history": {
+    "title": "HISTORIQUE",
+    "trail": "Trace",
+    "heatmap": "Heatmap",
+    "noMovementTitle": "Aucun déplacement",
+    "noMovementHint": "{{name}} n'a pas bougé sur cette période.",
+    "points": "{{count}} pts",
+    "play": "Lecture",
+    "pause": "Pause"
+  }
+}

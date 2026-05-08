@@ -1,0 +1,155 @@
+{
+  "app": {
+    "name": "TOT",
+    "tagline": "Seguimiento GPS de tu gato en la TV"
+  },
+  "common": {
+    "back": "Atrás",
+    "cancel": "Cancelar",
+    "ok": "OK",
+    "save": "Guardar",
+    "loading": "Cargando…",
+    "retry": "Reintentar",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "auth": {
+    "login": {
+      "title": "Iniciar sesión",
+      "subtitle": "Credenciales de Tractive",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "tu@ejemplo.com",
+      "password": "Contraseña",
+      "passwordPlaceholder": "•••••••••",
+      "rememberMe": "Recordarme",
+      "rememberMeHint": "Tus credenciales se cifrarán en este dispositivo.",
+      "submit": "Iniciar sesión",
+      "submitting": "Iniciando sesión…",
+      "forgotPassword": "¿Credenciales olvidadas? Restablécelas en tractive.com",
+      "errors": {
+        "invalidCredentials": "Correo o contraseña incorrectos.",
+        "network": "No se puede conectar con el servidor. Comprueba tu conexión.",
+        "rateLimited": "Demasiados intentos. Inténtalo de nuevo en unos minutos.",
+        "generic": "Se ha producido un error al iniciar sesión."
+      }
+    },
+    "logout": {
+      "confirm": "¿Cerrar sesión?",
+      "confirmHint": "Tus credenciales locales se eliminarán.",
+      "submit": "Cerrar sesión",
+      "exit": {
+        "confirm": "¿Salir de la aplicación?",
+        "confirmHint": "La aplicación se cerrará y tus credenciales locales se eliminarán.",
+        "submit": "Salir"
+      }
+    }
+  },
+  "map": {
+    "recenter": "Centrar",
+    "home": "Casa",
+    "refresh": "Actualizar",
+    "live": "Modo en vivo",
+    "liveStop": "Salir del directo",
+    "liveActive": "En vivo — {{remaining}}s",
+    "liveBlockedPSZ": "{{name}} está en una zona de ahorro de energía. El modo en vivo no está disponible.",
+    "history": "Historial",
+    "menu": "Menú",
+    "lastSeen": "Visto {{time}}",
+    "battery": "Batería {{level}}%",
+    "sensor": {
+      "GPS": "GPS",
+      "WIFI": "Wi-Fi",
+      "CELLULAR": "Móvil",
+      "KNOWN_WIFI": "Wi-Fi guardada",
+      "BLUETOOTH": "Bluetooth"
+    }
+  },
+  "status": {
+    "online": "En línea",
+    "offline": "Sin conexión",
+    "gps_fix": "Posición GPS",
+    "last_known_wifi_cell": "Última posición conocida",
+    "power_saving_zone": "Zona de ahorro de energía",
+    "charging": "Cargando",
+    "live_active": "En vivo",
+    "live_reconnecting": "Reconectando…",
+    "low_battery": "Batería baja"
+  },
+  "geofence": {
+    "outOfZone": "¡{{name}} ha salido de la zona {{zone}}!",
+    "inZone": "{{name}} está en la zona {{zone}}"
+  },
+  "pets": {
+    "title": "Mis mascotas",
+    "menu": "Mascotas",
+    "available_one": "{{count}} rastreador disponible",
+    "available_other": "{{count}} rastreadores disponibles"
+  },
+  "nav": {
+    "map": "Mapa",
+    "settings": "Ajustes",
+    "health": "Salud"
+  },
+  "health": {
+    "title": "Salud",
+    "syncedAgo": "Sincronizado {{time}}",
+    "activity": {
+      "title": "Actividad",
+      "ratio": "{{active}} / {{goal}} min",
+      "goalLabel": "Objetivo diario"
+    },
+    "sleep": {
+      "title": "Sueño",
+      "night": "Noche",
+      "day": "Día",
+      "calm": "Calma"
+    },
+    "heartRate": { "title": "Frecuencia cardíaca", "unit": "lpm" },
+    "respiratoryRate": { "title": "Frecuencia respiratoria", "unit": "rpm" },
+    "status": {
+      "NORMAL": "Normal",
+      "LOW": "Baja",
+      "HIGH": "Alta",
+      "UNKNOWN": "—"
+    },
+    "weekAverage": "Med. 7d: {{value}} {{unit}}",
+    "calculating": "Aprendiendo · día {{day}}/7",
+    "premiumRequired": {
+      "title": "Tractive Premium necesario",
+      "body": "Los datos de salud están reservados a las cuentas Premium.",
+      "cta": "Más información en tractive.com"
+    },
+    "loadError": "No se pueden cargar los datos de salud."
+  },
+  "settings": {
+    "title": "Ajustes",
+    "language": "Idioma",
+    "zoneSound": {
+      "title": "Sonido de alerta de zona",
+      "description": "Reproduce un sonido cuando el gato sale de una zona segura."
+    },
+    "logout": {
+      "title": "Cerrar sesión",
+      "session": "Sesión: {{userId}} · caduca el {{date}}"
+    },
+    "errors": {
+      "loadTrackers": "No se han podido cargar los rastreadores.",
+      "loadTrackersTitle": "Error",
+      "noPetsTitle": "No se ha encontrado ningún gato",
+      "noPetsHint": "Añade un rastreador en la app oficial de Tractive y vuelve aquí.",
+      "trackerNotFound": "Rastreador no encontrado",
+      "missingMaptilerKey": "Falta EXPO_PUBLIC_MAPTILER_KEY",
+      "waitingPosition": "Esperando la posición…"
+    }
+  },
+  "history": {
+    "title": "HISTORIAL",
+    "trail": "Recorrido",
+    "heatmap": "Mapa de calor",
+    "noMovementTitle": "Sin movimiento",
+    "noMovementHint": "{{name}} no se ha movido en este periodo.",
+    "points": "{{count}} pts",
+    "play": "Reproducir",
+    "pause": "Pausar"
+  }
+}

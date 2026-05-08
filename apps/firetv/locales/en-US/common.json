@@ -1,0 +1,155 @@
+{
+  "app": {
+    "name": "TOT",
+    "tagline": "GPS tracking for your cat, on the TV"
+  },
+  "common": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "save": "Save",
+    "loading": "Loading…",
+    "retry": "Retry",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Tractive credentials",
+      "email": "Email address",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "•••••••••",
+      "rememberMe": "Remember me",
+      "rememberMeHint": "Your credentials will be encrypted on this device.",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "forgotPassword": "Forgot your credentials? Reset on tractive.com",
+      "errors": {
+        "invalidCredentials": "Incorrect email or password.",
+        "network": "Cannot reach the server. Check your connection.",
+        "rateLimited": "Too many attempts. Try again in a few minutes.",
+        "generic": "An error occurred while signing in."
+      }
+    },
+    "logout": {
+      "confirm": "Sign out?",
+      "confirmHint": "Your local credentials will be deleted.",
+      "submit": "Sign out",
+      "exit": {
+        "confirm": "Exit the app?",
+        "confirmHint": "The app will close and your local credentials will be deleted.",
+        "submit": "Exit"
+      }
+    }
+  },
+  "map": {
+    "recenter": "Recenter",
+    "home": "Home",
+    "refresh": "Refresh",
+    "live": "Live mode",
+    "liveStop": "Stop live",
+    "liveActive": "Live on — {{remaining}}s",
+    "liveBlockedPSZ": "{{name}} is in a power-saving zone. Live mode is not available.",
+    "history": "History",
+    "menu": "Menu",
+    "lastSeen": "Seen {{time}}",
+    "battery": "Battery {{level}}%",
+    "sensor": {
+      "GPS": "GPS",
+      "WIFI": "Wi-Fi",
+      "CELLULAR": "Cellular",
+      "KNOWN_WIFI": "Known Wi-Fi",
+      "BLUETOOTH": "Bluetooth"
+    }
+  },
+  "status": {
+    "online": "Online",
+    "offline": "Offline",
+    "gps_fix": "GPS fix",
+    "last_known_wifi_cell": "Last known position",
+    "power_saving_zone": "Power-saving zone",
+    "charging": "Charging",
+    "live_active": "Live active",
+    "live_reconnecting": "Reconnecting…",
+    "low_battery": "Low battery"
+  },
+  "geofence": {
+    "outOfZone": "{{name}} left the zone {{zone}}!",
+    "inZone": "{{name}} is in the zone {{zone}}"
+  },
+  "pets": {
+    "title": "My pets",
+    "menu": "Pets",
+    "available_one": "{{count}} tracker available",
+    "available_other": "{{count}} trackers available"
+  },
+  "nav": {
+    "map": "Map",
+    "settings": "Settings",
+    "health": "Health"
+  },
+  "health": {
+    "title": "Health",
+    "syncedAgo": "Synced {{time}}",
+    "activity": {
+      "title": "Activity",
+      "ratio": "{{active}} / {{goal}} min",
+      "goalLabel": "Daily goal"
+    },
+    "sleep": {
+      "title": "Sleep",
+      "night": "Night",
+      "day": "Day",
+      "calm": "Calm"
+    },
+    "heartRate": { "title": "Heart rate", "unit": "bpm" },
+    "respiratoryRate": { "title": "Respiratory rate", "unit": "rpm" },
+    "status": {
+      "NORMAL": "Normal",
+      "LOW": "Low",
+      "HIGH": "High",
+      "UNKNOWN": "—"
+    },
+    "weekAverage": "7d avg: {{value}} {{unit}}",
+    "calculating": "Learning · day {{day}}/7",
+    "premiumRequired": {
+      "title": "Tractive Premium required",
+      "body": "Health data is only available for Premium accounts.",
+      "cta": "Learn more on tractive.com"
+    },
+    "loadError": "Unable to load health data."
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "zoneSound": {
+      "title": "Zone alert sound",
+      "description": "Plays a sound when your cat leaves a safe zone."
+    },
+    "logout": {
+      "title": "Sign out",
+      "session": "Session: {{userId}} · expires {{date}}"
+    },
+    "errors": {
+      "loadTrackers": "Unable to load trackers.",
+      "loadTrackersTitle": "Error",
+      "noPetsTitle": "No cat found",
+      "noPetsHint": "Add a tracker in the official Tractive app, then come back here.",
+      "trackerNotFound": "Tracker not found",
+      "missingMaptilerKey": "EXPO_PUBLIC_MAPTILER_KEY missing",
+      "waitingPosition": "Waiting for position…"
+    }
+  },
+  "history": {
+    "title": "HISTORY",
+    "trail": "Trail",
+    "heatmap": "Heatmap",
+    "noMovementTitle": "No movement",
+    "noMovementHint": "{{name}} hasn't moved during this period.",
+    "points": "{{count}} pts",
+    "play": "Play",
+    "pause": "Pause"
+  }
+}
